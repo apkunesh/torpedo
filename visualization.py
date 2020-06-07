@@ -2,6 +2,11 @@ from matplotlib import pyplot as plt
 from copy import copy
 
 def show_all_hands(three_players):
+    """[summary]
+
+    Args:
+        three_players ([type]): [description]
+    """
         #for now I'll assume 3 players
     fig,ax = plt.subplots(figsize=(16,9))
 
