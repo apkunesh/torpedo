@@ -6,36 +6,36 @@ from copy import copy
 player_actions = ['Draw from Discard','Draw from Deck','Discard','Buy','Allow Buy','Lay Down','Play from Hand','Exchange Joker']
 
 def print_action(player):
-    """[summary]
+    """Shows all available actions of a player as text.
 
     Args:
-        player ([type]): [description]
+        player (Player): The player whose available actions are to be shown.
     """
     [print(str(i)+': '+player.available_actions[i]) for i in range(len(player.available_actions))]
 
 
 def get_action(player):
-    """[summary]
+    """Queries the player for any desired actions.
 
     Args:
-        player ([type]): [description]
+        player (Player): The player whose action is desired.
 
     Returns:
-        [type]: [description]
+        String: The player's choice of action
     """
     print_action(player)
     chosen_action_index = int(input('Please indicate your selection from the following list by inputting the number: '))
     return player.available_actions[chosen_action_index]
 
 def set_predraw_player_actions(whose_turn,players):
-    """[summary]
+    """Locks and unlocks the actions of all players prior to the draw.
 
     Args:
-        whose_turn ([type]): [description]
-        players ([type]): [description]
+        whose_turn (int): The index of the active player in the list players
+        players (list of Player): The ordered, static list of Torpedo players
 
     Returns:
-        [type]: [description]
+        list of players: players who are not active.
     """
     active_player = players[whose_turn]
     active_player.available_actions = ['Draw from Discard','Draw from Deck','Allow Buy']
@@ -49,7 +49,7 @@ def set_predraw_player_actions(whose_turn,players):
     return inactive_players
 
 class Player():
-    """[summary]
+    """A typically human-controlled object used to keep track of cards, actions, and points.
     """
     def __init__(self,username):
         self.id = username
@@ -60,13 +60,13 @@ class Player():
         self.buy_count = 0
 
 def draw_or_allow_buy(whose_turn,players,full_deck,discard_pile):
-    """[summary]
+    """Manages pre-draw logic.
 
     Args:
-        whose_turn ([type]): [description]
-        players ([type]): [description]
-        full_deck ([type]): [description]
-        discard_pile ([type]): [description]
+        whose_turn (int): The index of the active player
+        players (list of Player): A list of the torpedo players
+        full_deck (MultiDeck): The complete deck used for your game of torpedo
+        discard_pile (DiscardPile): The pile to which cards from a player's hand is thrown.
     """
     active_player = players[whose_turn]
     print(active_player.id + ' is up!')
@@ -84,11 +84,11 @@ def draw_or_allow_buy(whose_turn,players,full_deck,discard_pile):
         print('ERROR in draw_allow_or_buy in turn_management')
 
 def set_postdraw_player_actions(whose_turn,players):
-    """[summary]
+    """Manages player actions after the active player's draw.
 
     Args:
-        whose_turn ([type]): [description]
-        players ([type]): [description]
+        whose_turn (int): The index of the active player
+        players (list of Player): The players of your game of torpedo
     """
     active_player = players[whose_turn]
     for player in players:
@@ -102,14 +102,14 @@ def set_postdraw_player_actions(whose_turn,players):
         active_player.available_actions = ['Discard','Play from Hand','Exchange Joker']
 
 def indicate_discard_card(whose_turn,players):
-    """[summary]
+    """Queries and returns a player who is sending a card to the discard pile.
 
     Args:
-        whose_turn ([type]): [description]
-        players ([type]): [description]
+        whose_turn (int): The index of the active player
+        players ([type]): The players of your game of torpedo.
 
     Returns:
-        [type]: [description]
+        int: The index (in the player's hand) of the card which the player has chosen to discard.
     """
     cards_to_choose_from = players[whose_turn].hand.cards
     players[whose_turn].hand.print_cards()
@@ -117,13 +117,14 @@ def indicate_discard_card(whose_turn,players):
     return chosen_to_discard
 
 def lay_down_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_pile):
-    """[summary]
+    """Manages the logic for 'going butterfly,' ending the turn, and
+    exchanging for a joker.
 
     Args:
-        whose_turn ([type]): [description]
-        players ([type]): [description]
-        full_deck ([type]): [description]
-        discard_pile ([type]): [description]
+        whose_turn (int): The index of the active player
+        players (list of Player): The players of your game of Torpedo
+        full_deck (Multideck): The "random" drawing deck.
+        discard_pile (DiscardPile): The pile to which undesired cards are sent.
     """
     active_player = players[whose_turn]
     set_postdraw_player_actions(whose_turn,players)
@@ -140,7 +141,7 @@ def lay_down_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_p
 
 
 def play_hand_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_pile):
-    """[summary]
+    """Manages logic for 'butterfly' end-of-turn.
 
     Args:
         whose_turn ([type]): [description]
@@ -151,13 +152,17 @@ def play_hand_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_
     pass
 
 def player_turn(whose_turn,players,full_deck,round_descriptor,discard_pile):
-    """[summary]
+    """The master function, called every time a player begins a turn.
+
+    There are two basic parts: predraw and postdraw. During predraw, any player can "buy"
+    the most recently discarded, non-dead card. During the postdraw, the player can lay down,
+    exchange a joker, play their hand, or discard, depending on the table and player phase.
 
     Args:
-        whose_turn ([type]): [description]
-        players ([type]): [description]
-        full_deck ([type]): [description]
-        round_descriptor ([type]): [description]
+        whose_turn (int): The index of the active player
+        players (list of Player): The players of your game of Torpedo.
+        full_deck (MultiDeck): The "random" or "live" central drawing deck.
+        round_descriptor (String): The round: 2 books and a run, etc.
         discard_pile ([type]): [description]
     """
     sleep(1) #allowing players to examine cards to decide if they want to buy.

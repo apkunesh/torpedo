@@ -15,22 +15,25 @@ rounds = ['Two Books','Two Runs','Two Runs And A Book','Two Books And A Run','Th
 
 
 def establish_players(n_players):
-    """[summary]
+    """Gets player information for display and reference. 
+
+    Eventually should include getting the players' IP addresses etc
+    for online connectivity
 
     Args:
-        n_players ([type]): [description]
+        n_players (int): The number of players to place in the game
 
     Returns:
-        [type]: [description]
+        dict: A dictionary of user information, such as username
     """
     usernames_out = [input('Please input a username for player ' +str(i)) for i in range(n_players)]
     return {'username':usernames_out}
 
 def refresh_all_players(all_players):
-    """[summary]
+    """Sets all players to the "default" state before a round begins.
 
     Args:
-        all_players ([type]): [description]
+        all_players (list of Player): The players in your game of Torpedo
     """
     for player in all_players:
         player.locked_actions = player.available_actions
@@ -41,15 +44,15 @@ def refresh_all_players(all_players):
         #update screens here to show the locking.
 
 def deal(list_of_Player, Multideck,dealer_index):
-    """[summary]
+    """Deals 9 cards to each player.
 
     Args:
-        list_of_Player ([type]): [description]
-        Multideck ([type]): [description]
-        dealer_index ([type]): [description]
+        list_of_Player (list of Player): The players of your game of Torpedo
+        Multideck (Multideck): The central "drawing" deck
+        dealer_index (int): The index of the round's dealer, used to establish player order.
 
     Returns:
-        [type]: [description]
+        int: The index of the next dealer.
     """
     for i in range(9):
         [player.hand.cards.append(Multideck.draw_top()) for player in list_of_Player]
@@ -60,20 +63,26 @@ def deal(list_of_Player, Multideck,dealer_index):
 #def player_turn(whose_turn):
 
 def is_round_over():
-    """[summary]
+    """Check, to be used at the end of each player turn, to see if the round is complete.
+
+    True if the most recent player discarded their final card and now has 0 cards.
+    False otherwise (allowing for the game to continue even if the player has 0 cards).
 
     Returns:
-        [type]: [description]
+        Bool: Confirms or denies the end of the round.
     """
     return False
 
-def assign_points():
-    """[summary]
+def assign_points(players):
+    """Penalizes players with points after the end of a round.
+
+    Args:
+        players (list of Player): The players of your game of Torpedo.
     """
     pass
 
 def display_results():
-    """[summary]
+    """Displays the scores and congratulates the winner.
     """
     pass
 

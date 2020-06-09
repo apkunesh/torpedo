@@ -14,7 +14,7 @@ rank_dict = {'A':'ace','2':'two','3':'three','4':'four','5':'five','6':'six','7'
 suit_dict = {'C':'clubs','D':'diamonds','S':'spades','H':'hearts','JOK':'jokers (wut?)'}
 
 class Card():
-    """[summary]
+    """A conventional playing card.
     """
     def __init__(self,card_id):
         self.id = card_id
@@ -24,44 +24,65 @@ class Card():
         self.name = rank_dict[str(self.rank)] + ' of ' + suit_dict[self.suit]
 
 class CardGroup():
-    """[summary]
+    """An ordered set of cards.
     """
     def __init__(self):
         self.cards = []
     def add_cards(self,cards_in):
+        """Adds cards to the card group.
+
+        Args:
+            cards_in (list of Cards): cards to be added to the card group
+        """
         [self.cards.append(card_in) for card_in in cards_in]
     def add_card(self,card_in):
+        """Adds a single card to the card group.
+
+        Args:
+            card_in (Card): card to be added to the card group
+        """
         self.cards.append(card_in)
     def is_book(self):
+        """Tests if the card group forms a Torpedo book, or "three of a kind."
+        """
         if len(self.cards) != 3:
-            truth_value = False
+            i_am_book = False
         else:
-            pass #Include additional logic checkers here
+            i_am_book = (self.cards[0].rank == self.cards[1].rank) and (self.cards[1].rank == self.cards[2].rank)
+        return i_am_book
     def is_run(self):
-        pass # Include logic checker here, too.
+        if len(self.cards) != 4:
+            i_am_run = False
+        else:
+            pass # TODO: Include additional logic here.
+        return i_am_run
     def print_cards(self):
         print(self.cards[1].name)
         [print(str(i)+': ' +str(self.cards[i].name)+ '.') for i in range(len(self.cards))]
 
 
 class Deck(CardGroup):
-    """[summary]
-
-    Args:
-        CardGroup ([type]): [description]
+    """A deck of 52 cards plus jokers, or whatever you've stored in deck_of_cards.xlsx. Also references images
+    in the "card_images" directory.
     """
     def __init__(self):
+        """A deck of 52 cards plus jokers, or whatever you've stored in deck_of_cards.xlsx. 
+        
+        Also references images in the "card_images" directory.
+        """
         super().__init__()
         self.initialize_full_deck()
     def initialize_full_deck(self):
-        """[summary]
+        """Sets the cards attribute to include all cards in deck_of_cards.xslx.
         """
         self.cards = [Card(card_id) for card_id in deck_info.index]
     def draw_top(self):
-        """[summary]
+        """Returns a card, drawn at random, from the deck, and removes that card from the deck.
+        
+        Unintuitively, this function does not actually care about card ordering.
 
         Returns:
-            [type]: [description]
+            Card: The drawn card.
         """
         if len(self.cards) == 0:
             print('Sorry, no more cards can be drawn from this empty deck. Returning None.')
@@ -73,19 +94,20 @@ class Deck(CardGroup):
         return drawn_card
 
 class DiscardPile(CardGroup):
-    """[summary]
-
-    Args:
-        CardGroup ([type]): [description]
+    """An ordered discard pile. The most recent card is drawn first.
     """
     def __init__(self):
+        """An ordered discard pile. The most recent card is drawn first.
+        """
         super().__init__()
         self.is_dead = False
     def draw_top(self):
-        """[summary]
+        """Draws the most recent card discarded, if any; otherwise, returns nothing.
+
+        This removes the drawn card from the discard pile.
 
         Returns:
-            [type]: [description]
+            Card: The most recently discarded card.
         """
         if len(self.cards) == 0:
             print('Sorry, no more cards can be drawn from the discard pile. Returning None.')
@@ -95,33 +117,47 @@ class DiscardPile(CardGroup):
             self.cards.pop(-1)
         return drawn_card
     def discard_from_player(self,player_in,card_index_in):
-        """[summary]
+        """Transfers card from a player's hand to the discard pile.
+
+        Removes the card from the player's hand and pushes the discarded card to the top of the discard pile.
 
         Args:
-            player_in ([type]): [description]
-            card_index_in ([type]): [description]
+            player_in (Player): The player discarding the card
+            card_index_in (int): The index of the discarded card in the player's hand
         """
         card_to_discard = player_in.hand.cards[card_index_in]
         self.discard(card_to_discard)
         player_in.hand.cards.pop(card_index_in)
     def discard(self,card_in):
-        """[summary]
+        """Pushes a card to the top of the discard pile. 
+        
+        If a player is discarding a card, use instead discard_from_player.
 
         Args:
-            card_in ([type]): [description]
+            card_in (Card): The card to be discarded
         """
         self.cards.append(card_in)
         #Refresh image here?
 
 
 class Multideck():
+    """A collection of decks -- used in torpedo, a multi-deck game. 
+
+    This class helps avoid complications related to nonunique identifiers between cards from different decks.
+    """
     def __init__(self,n_decks):
+        """A collection of decks -- used in torpedo, a multi-deck game. 
+
+        This class helps avoid complications related to nonunique identifiers between cards from different decks.
+        """
         self.all_decks = [Deck() for i in range(n_decks)]
     def draw_top(self):
-        """[summary]
+        """Draws a random card from the multideck.
+
+        Similar to draw_top from the Deck class. Removes the drawn card from the multideck.
 
         Returns:
-            [type]: [description]
+            Card: The drawn card. 
         """
         n_cards_in_decks = [len(deck.cards) for deck in self.all_decks]
         cumulants = [n_cards_in_decks[0]]

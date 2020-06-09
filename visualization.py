@@ -2,10 +2,10 @@ from matplotlib import pyplot as plt
 from copy import copy
 
 def show_all_hands(three_players):
-    """[summary]
+    """Shows the hands of three players (all cards facing the camera).
 
     Args:
-        three_players ([type]): [description]
+        three_players (list of Player): The three players whose hands are to be shown.
     """
         #for now I'll assume 3 players
     fig,ax = plt.subplots(figsize=(16,9))
@@ -36,4 +36,4 @@ def show_all_hands(three_players):
 
     ax.set_xlim(0,2000)
     ax.set_ylim(0,1000)
-    plt.show()
+    plt.show(block=False)
