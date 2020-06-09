@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from playing_cards import Deck, Card, CardGroup, Multideck, DiscardPile
 from numpy.random import randint
 from turn_management import player_turn, Player
-from visualization import show_all_hands
+from visualization import show_all_hands, show_table_omniscient
 from time import sleep
 
 n_players = 3
@@ -90,6 +90,9 @@ players_info = establish_players(n_players)
 players = [Player(usernameboi) for usernameboi in players_info['username']]
 all_points = []
 dealer_index = 0
+fig,ax = plt.subplots(figsize=(16,9))
+
+fig.canvas.draw_idle()
 for round_descriptor in rounds:
     discard_pile = DiscardPile()
     refresh_all_players(players)
@@ -102,12 +105,12 @@ for round_descriptor in rounds:
     sleep(1) #Change to 15 eventually
     discard_pile.discard(full_deck.draw_top())
     while round_over == False:
+        show_table_omniscient(players,discard_pile,full_deck,fig,ax)
         #input(players[0].hand.cards[0].name)
-        show_all_hands(players)
+        #show_all_hands(players)
         player_turn(whose_turn,players,full_deck,round_descriptor,discard_pile)
         round_over = is_round_over()
         whose_turn = (whose_turn+1) % len(players) 
-
     assign_points()
 display_results()
 

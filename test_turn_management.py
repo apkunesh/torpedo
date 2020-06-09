@@ -1,6 +1,6 @@
 from turn_management import Player, player_actions, draw_or_allow_buy
 players = [Player(usernameboi) for usernameboi in ['Adam','Darcy','Randy']]
-from visualization import show_all_hands(players)
+from visualization import show_all_hands
 
 
 print(draw_or_allow_buy(3,players,None))
