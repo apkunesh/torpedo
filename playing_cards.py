@@ -13,6 +13,22 @@ deck_info = pd.read_excel('deck_of_cards.xlsx',index_col=0)
 rank_dict = {'A':'ace','2':'two','3':'three','4':'four','5':'five','6':'six','7':'seven','8':'eight','9':'nine','10':'ten','J':'jack','Q':'queen','K':'king','JOK':'joker'}
 suit_dict = {'C':'clubs','D':'diamonds','S':'spades','H':'hearts','JOK':'jokers (wut?)'}
 
+def remove_cards_from_cardgroup(cardgroup_in,indices):
+    indices.sort(reverse=True)
+    for index in indices:
+        cardgroup_in.cards.pop(index)
+
+def construct_hand_by_cardnames(*card_names):
+    hand_out = CardGroup()
+    hand_out.add_cards([Card(card_id) for card_id in card_names])
+    return hand_out
+
+def next_rank_in_the_cycle(card_in):
+    all_cards = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
+    index_of_card_in = all_cards.index(str(card_in.rank))
+    #print(all_cards[(index_of_card_in+1) % 13])
+    return all_cards[(index_of_card_in+1) % 13]
+
 class Card():
     """A conventional playing card.
     """
@@ -34,14 +50,14 @@ class CardGroup():
         Args:
             cards_in (list of Cards): cards to be added to the card group
         """
-        [self.cards.append(card_in) for card_in in cards_in]
+        [self.cards.append(copy(card_in)) for card_in in cards_in]
     def add_card(self,card_in):
         """Adds a single card to the card group.
 
         Args:
             card_in (Card): card to be added to the card group
         """
-        self.cards.append(card_in)
+        self.cards.append(copy(card_in))
     def is_book(self):
         """Tests if the card group forms a Torpedo book, or "three of a kind."
         """
@@ -50,11 +66,31 @@ class CardGroup():
         else:
             i_am_book = (self.cards[0].rank == self.cards[1].rank) and (self.cards[1].rank == self.cards[2].rank)
         return i_am_book
-    def is_run(self):
-        if len(self.cards) != 4:
+    def is_run(self): 
+        if len(self.cards) != 4: #First checking that the run has 4 cards
             i_am_run = False
-        else:
-            pass # TODO: Include additional logic here.
+            #print('Incorrect # of cards')
+        else: 
+            first_rank = self.cards[0].rank 
+            if ((first_rank == 'Q') or (first_rank == 'K')): #Now disallowing looparounds
+                i_am_run = False
+                #print('No looparounds!')
+            else: #Now to check that all suits are the same
+                if ((self.cards[0].suit == self.cards[1].suit) and (self.cards[1].suit == self.cards[2].suit) and (self.cards[2].suit == self.cards[3].suit)):
+                    
+                    #Finally, are cards in order:
+                    if ((str(self.cards[1].rank) == next_rank_in_the_cycle(self.cards[0])) and
+                        (str(self.cards[2].rank) == next_rank_in_the_cycle(self.cards[1])) and 
+                        (str(self.cards[3].rank) == next_rank_in_the_cycle(self.cards[2])) 
+                        ):
+                        i_am_run = True
+                        #print('Congrats!')
+                    else:
+                        i_am_run = False
+                        #print('cards in wrong order')
+                else:
+                    #print('Suits do not match')
+                    i_am_run = False    
         return i_am_run
     def print_cards(self):
         print(self.cards[1].name)

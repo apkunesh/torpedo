@@ -3,15 +3,17 @@ from matplotlib.pyplot import imread as image_reader
 from matplotlib import pyplot as plt
 from playing_cards import Deck, Card, CardGroup, Multideck, DiscardPile
 from numpy.random import randint
-from turn_management import player_turn, Player
+from turn_management import player_turn, Player, rounds
 from visualization import show_all_hands, show_table_omniscient
 from time import sleep
 
 n_players = 3
-
-
 n_decks = 2
-rounds = ['Two Books','Two Runs','Two Runs And A Book','Two Books And A Run','Three Books','Three Runs']
+
+def next_rank_in_the_cycle(card_in):
+    all_cards = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
+    index_of_card_in = all_cards.index(str(card_in.rank))
+    return all_cards[(index_of_card_in+1) % 13]
 
 
 def establish_players(n_players):
@@ -62,7 +64,7 @@ def deal(list_of_Player, Multideck,dealer_index):
 
 #def player_turn(whose_turn):
 
-def is_round_over():
+def is_round_over(whose_turn,players):
     """Check, to be used at the end of each player turn, to see if the round is complete.
 
     True if the most recent player discarded their final card and now has 0 cards.
@@ -71,7 +73,11 @@ def is_round_over():
     Returns:
         Bool: Confirms or denies the end of the round.
     """
-    return False
+    if ((len(players[whose_turn].hand.cards) == 0) and (players[whose_turn].has_discarded == True)):
+        round_over = True
+    else:
+        round_over = False
+    return round_over
 
 def assign_points(players):
     """Penalizes players with points after the end of a round.
@@ -109,7 +115,7 @@ for round_descriptor in rounds:
         #input(players[0].hand.cards[0].name)
         #show_all_hands(players)
         player_turn(whose_turn,players,full_deck,round_descriptor,discard_pile)
-        round_over = is_round_over()
+        round_over = is_round_over(whose_turn,players)
         whose_turn = (whose_turn+1) % len(players) 
     assign_points()
 display_results()

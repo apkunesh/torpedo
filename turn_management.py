@@ -1,31 +1,12 @@
-from playing_cards import CardGroup
+from playing_cards import CardGroup, remove_cards_from_cardgroup
 from time import sleep
 from copy import copy
+from player_input import get_action, indicate_discard_card, print_action
 
-
+rounds = ['Two Books','Two Runs','Two Runs And A Book','Two Books And A Run','Three Books','Three Runs']
 player_actions = ['Draw from Discard','Draw from Deck','Discard','Buy','Allow Buy','Lay Down','Play from Hand','Exchange Joker']
+laydown_dict = {'Two Books':[2,0],'Two Runs':[0,2],'Two Runs And A Book':[2,0],'Two Books And A Run':[2,1],'Two Runs And A Book':[1,2],'Three Books':[3,0],'Three Runs':[0,3]}
 
-def print_action(player):
-    """Shows all available actions of a player as text.
-
-    Args:
-        player (Player): The player whose available actions are to be shown.
-    """
-    [print(str(i)+': '+player.available_actions[i]) for i in range(len(player.available_actions))]
-
-
-def get_action(player):
-    """Queries the player for any desired actions.
-
-    Args:
-        player (Player): The player whose action is desired.
-
-    Returns:
-        String: The player's choice of action
-    """
-    print_action(player)
-    chosen_action_index = int(input('Please indicate your selection from the following list by inputting the number: '))
-    return player.available_actions[chosen_action_index]
 
 def set_predraw_player_actions(whose_turn,players):
     """Locks and unlocks the actions of all players prior to the draw.
@@ -58,6 +39,8 @@ class Player():
         self.available_actions = player_actions
         self.locked_actions = []
         self.buy_count = 0
+        self.has_discarded = False
+        self.table_cards = []
 
 def draw_or_allow_buy(whose_turn,players,full_deck,discard_pile):
     """Manages pre-draw logic.
@@ -101,22 +84,43 @@ def set_postdraw_player_actions(whose_turn,players):
     else:
         active_player.available_actions = ['Discard','Play from Hand','Exchange Joker']
 
-def indicate_discard_card(whose_turn,players):
-    """Queries and returns a player who is sending a card to the discard pile.
 
-    Args:
-        whose_turn (int): The index of the active player
-        players ([type]): The players of your game of torpedo.
 
-    Returns:
-        int: The index (in the player's hand) of the card which the player has chosen to discard.
-    """
-    cards_to_choose_from = players[whose_turn].hand.cards
-    players[whose_turn].hand.print_cards()
-    chosen_to_discard = int(input('Select a card to discard. Type a number. '))
-    return chosen_to_discard
+def laydown_manager(player, round_descriptor):
+    required_cardgroups = laydown_dict[round_descriptor]
+    n_books = required_cardgroups[0]
+    n_runs = required_cardgroups[1]
+    for i in range(n_books):
+        player.table_cards.append(CardGroup())
+        player.hand.print_cards()
+        indices_to_add = []
+        for j in range(3):
+            indices_to_add.append(int(input('Select index of card ' + str(j) + ' in book ' + str(i) + ': ')))
+        player.table_cards[i].add_cards([player.hand.cards[indexboi] for indexboi in indices_to_add])
+        if player.table_cards[i].is_book():
+            print('Book ' + str(i) + ' is a success!')
+            remove_cards_from_cardgroup(player.hand,indices_to_add)
+        else:
+            print('Sorry, this is not a book.')
+            remove_cards_from_cardgroup(player.table_cards[i],[0,1,2])
+            break
+    for i in range(n_runs):
+        player.table_cards.append(CardGroup())
+        player.hand.print_cards()
+        indices_to_add = []
+        for j in range(4):
+            indices_to_add.append(int(input('Select index of card ' + str(j) + ' in run ' + str(i) + ': ')))
+        player.table_cards[i].add_cards([player.hand.cards[indexboi] for indexboi in indices_to_add])
+        if player.table_cards[i].is_run():
+            print('Run ' + str(i) + ' is a success!')
+            remove_cards_from_cardgroup(player.hand,indices_to_add)
+        else:
+            print('Sorry, this is not a run.')
+            remove_cards_from_cardgroup(player.table_cards[i],[0,1,2,3])
+            break
 
-def lay_down_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_pile):
+
+def lay_down_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_pile,round_descriptor):
     """Manages the logic for 'going butterfly,' ending the turn, and
     exchanging for a joker.
 
@@ -133,7 +137,7 @@ def lay_down_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_p
         discard_index = indicate_discard_card(whose_turn,players)
         discard_pile.discard_from_player(active_player,discard_index)
     elif chosen_action == 'Lay Down':
-        pass
+        laydown_manager(active_player,round_descriptor)
     elif chosen_action == 'Exchange Joker':
         pass
     else:
@@ -168,7 +172,7 @@ def player_turn(whose_turn,players,full_deck,round_descriptor,discard_pile):
     sleep(1) #allowing players to examine cards to decide if they want to buy.
     draw_or_allow_buy(whose_turn,players,full_deck,discard_pile)
     if players[whose_turn].is_down == False:
-        lay_down_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_pile)
+        lay_down_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_pile,round_descriptor)
     else:
         play_hand_or_discard_or_exchange_joker(whose_turn,players,full_deck,discard_pile)
 
